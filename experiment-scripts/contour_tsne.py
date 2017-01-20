@@ -4,6 +4,7 @@ import numpy as np
 from sklearn.manifold import TSNE
 from sklearn.preprocessing import StandardScaler
 import argparse
+import os
 
 
 VOCALS = ['male singer', 'female singer', 'male speaker', 'female speaker',
@@ -32,7 +33,7 @@ def contour_tsne(feature_file, feature_name_file, output_file, perplexity=50.0, 
 
     '''
 
-    features = np.load(feature_file)
+    features = np.load(os.path.expanduser(feature_file))
 
     # Random state.
     random_state = 20170120
@@ -53,7 +54,7 @@ def contour_tsne(feature_file, feature_name_file, output_file, perplexity=50.0, 
     scaler = StandardScaler()
 
     # Remove contours that are too short
-    names = np.load(feature_name_file)
+    names = np.load(os.path.expanduser(feature_name_file))
     duration_idx = names['feature_names'].tolist().index('duration')
     contour_idx = features['features'][:, duration_idx] >= min_duration
     Xsub = X[contour_idx]
@@ -88,7 +89,7 @@ def contour_tsne(feature_file, feature_name_file, output_file, perplexity=50.0, 
                "instruments": instruments,
                "random_state": random_state}
 
-    np.savez(output_file, **results)
+    np.savez(os.path.expanduser(output_file), **results)
 
 
 if __name__ == '__main__':
