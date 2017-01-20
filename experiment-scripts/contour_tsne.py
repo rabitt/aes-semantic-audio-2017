@@ -33,6 +33,7 @@ def contour_tsne(feature_file, feature_name_file, output_file, perplexity=50.0, 
 
     '''
 
+    print('Loading features...')
     features = np.load(os.path.expanduser(feature_file))
 
     # Random state.
@@ -54,6 +55,7 @@ def contour_tsne(feature_file, feature_name_file, output_file, perplexity=50.0, 
     scaler = StandardScaler()
 
     # Remove contours that are too short
+    print('Filtering by duration...')
     names = np.load(os.path.expanduser(feature_name_file))
     duration_idx = names['feature_names'].tolist().index('duration')
     contour_idx = features['features'][:, duration_idx] >= min_duration
@@ -66,9 +68,11 @@ def contour_tsne(feature_file, feature_name_file, output_file, perplexity=50.0, 
     ysub_bas = y_bas[contour_idx]
 
     # Standardize features
+    print('Standardizing...')
     Xsub_std = scaler.fit_transform(Xsub)
 
     # Compute TSNE
+    print('Computing TSNE projection...')
     projection = TSNE(random_state=random_state,
                       perplexity=perplexity,
                       n_iter=n_iter).fit_transform(Xsub_std)
@@ -89,7 +93,10 @@ def contour_tsne(feature_file, feature_name_file, output_file, perplexity=50.0, 
                "instruments": instruments,
                "random_state": random_state}
 
+    print('Saving results to disk...')
     np.savez(os.path.expanduser(output_file), **results)
+
+    print('Done.')
 
 
 if __name__ == '__main__':
