@@ -2,7 +2,7 @@
 # we need 1 node, with 1 process per node:
 #PBS -l nodes=1:ppn=1
 #PBS -l walltime=04:00:00
-#PBS -l mem=60gb
+#PBS -l mem=120gb
 #PBS -N tsne_500_50_5000
 #PBS -M justin.salamon@gmail.com
 #PBS -j oe
@@ -10,7 +10,7 @@
 #PBS -p 1000
 
 module purge
-module load scikit-learn/intel/0.18
+module load numpy/intel/1.12.0 scipy/intel/0.18.1 scikit-learn/intel/0.18.1
 SRCDIR=$HOME/dev/aes-semantic-audio-2016
 RUNDIR=$SCRATCH/aes-semantic-audio-2016/run-${PBS_JOBID/.*}
 mkdir $RUNDIR

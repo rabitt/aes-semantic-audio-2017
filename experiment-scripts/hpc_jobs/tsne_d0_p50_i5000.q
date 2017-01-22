@@ -10,7 +10,7 @@
 #PBS -p 1000
 
 module purge
-module load scikit-learn/intel/0.18
+module load numpy/intel/1.12.0 scipy/intel/0.18.1 scikit-learn/intel/0.18.1
 SRCDIR=$HOME/dev/aes-semantic-audio-2016
 RUNDIR=$SCRATCH/aes-semantic-audio-2016/run-${PBS_JOBID/.*}
 mkdir $RUNDIR
