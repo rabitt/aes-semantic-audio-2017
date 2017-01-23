@@ -15,6 +15,6 @@ SRCDIR=$HOME/dev/aes-semantic-audio-2016
 RUNDIR=$SCRATCH/aes-semantic-audio-2016/run-${PBS_JOBID/.*}
 mkdir $RUNDIR
 cd $RUNDIR
-python $SRCDIR/experiment-scripts/contour_tsne.py $SRCDIR/notebooks/analysis/vizdata/features-salience.npz $SRCDIR/notebooks/analysis/vizdata/feature-names.npz $SRCDIR/notebooks/analysis/vizdata/tsne_output/tsne_0_50_5000.npz --min_duration 0.0 --perplexity 50.0 --n_iter 5000
+python $SRCDIR/experiment-scripts/contour_tsne.py $SRCDIR/notebooks/analysis/vizdata/features-newactivations.npz $SRCDIR/notebooks/analysis/vizdata/feature-names.npz $SRCDIR/notebooks/analysis/vizdata/tsne_output/tsne_0_50_5000.npz --min_duration 0.0 --perplexity 50.0 --n_iter 5000
 
 
