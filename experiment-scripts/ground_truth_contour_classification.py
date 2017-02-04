@@ -37,41 +37,6 @@ def fit_model(X_train, Y_train, X_test, Y_test, compute_prob=True):
     return all_scores, clf
 
 
-def plot_scores(train_score, test_score, class_labels, clf):
-    #TODO: Decide what to do here
-    plt.figure(figsize=(12, 12))
-    plt.grid('off')
-
-    plt.subplot(2, 1, 1)
-    plt.title("training")
-    plt.imshow(
-        train_score['confusion matrix'], interpolation='none', cmap='hot'
-    )
-    plt.xticks(np.arange(len(class_labels)), class_labels)
-    plt.yticks(np.arange(len(class_labels)), class_labels)
-    plt.axis('auto')
-    plt.axis('tight')
-    plt.colorbar()
-
-    plt.subplot(2, 1, 2)
-    plt.title("testing")
-    plt.imshow(test_score['confusion matrix'], interpolation='none', cmap='hot')
-    plt.xticks(np.arange(len(class_labels)), class_labels)
-    plt.yticks(np.arange(len(class_labels)), class_labels)
-    plt.axis('auto')
-    plt.axis('tight')
-    plt.colorbar()
-
-    plt.show()
-
-    plt.figure(figsize=(12, 7))
-    y = clf.clf.feature_importances_
-    x = np.arange(len(y))
-    plt.bar(x, y)
-    plt.xticks(x + 0.5, FTR.feature_names, rotation='vertical')
-    plt.show()
-
-
 def main(args):
     save_dir = args.results_path
     save_contour_path = args.save_contour_path
@@ -79,6 +44,11 @@ def main(args):
         os.mkdir(save_dir)
     if not os.path.exists(save_contour_path):
         os.mkdir(save_contour_path)
+
+    n_harms = args.n_harms
+    rm_avg_pitch = bool(args.rm_avg_pitch)
+
+    print("rm_avg_pitch={}".format(rm_avg_pitch))
 
     ## Aggregate tracks that will be used in experiment
     all_trackids = utils.get_experiment_trackids()
@@ -109,112 +79,182 @@ def main(args):
         print("Computing ground truth contours...")
         (train_contours, train_instrument_labels,
          train_component_labels, train_trackid, _) = utils.get_contours(
-            train_ids, save_contour_path
-        )
+             train_ids, save_contour_path, n_harms
+         )
 
         (test_contours, test_instrument_labels,
          test_component_labels, test_trackid, _) = utils.get_contours(
-            test_ids, save_contour_path
-        )
+             test_ids, save_contour_path, n_harms
+         )
 
-        ## Run Vocal Non-Vocal Experiment
-        print("Running Vocal experiment...")
+        # ## Run Vocal Non-Vocal Experiment
+        # print("Running Vocal experiment...")
+        # try:
+        #     vocal_label_dict = utils.get_vocal_label_dict(
+        #         train_instrument_labels, test_instrument_labels, VOCALS
+        #     )
+        #     vocal_labels = ['non-vocal', 'vocal']
+        #     X_train, Y_train, X_test, Y_test = utils.build_training_testing_set(
+        #         train_contours, train_instrument_labels,
+        #         test_contours, test_instrument_labels,
+        #         vocal_label_dict, delete_avg_pitch=rm_avg_pitch
+        #     )
+        #     scores_vocal, vocal_clf = fit_model(
+        #         X_train, Y_train, X_test, Y_test
+        #     )
+
+        #     save_to_json(
+        #         {'labels': vocal_labels},
+        #         os.path.join(split_dir, 'vocal_labels.json')
+        #     )
+        #     save_to_json(
+        #         scores_vocal, os.path.join(split_dir, 'vocal_scores.json')
+        #     )
+        #     save_classifier(
+        #         vocal_clf, os.path.join(split_dir, 'vocal_classifier.pkl')
+        #     )
+        # except:
+        #     print('[Error] Vocal experiment failed somewhere.')
+
+        # ## run contour function experiment (melody/bass/other)
+        # print("Running Function experiment...")
+        # try:
+        #     print("    > computing features...")
+        #     function_label_dict = utils.get_function_label_dict(
+        #         train_component_labels, test_component_labels
+        #     )
+        #     function_labels = ['other', 'bass', 'melody']
+        #     X_train, Y_train, X_test, Y_test = utils.build_training_testing_set(
+        #         train_contours, train_component_labels,
+        #         test_contours, test_component_labels,
+        #         function_label_dict, delete_avg_pitch=rm_avg_pitch
+        #     )
+        #     print("    > fitting model...")
+        #     scores_function, function_clf = fit_model(
+        #         X_train, Y_train, X_test, Y_test, compute_prob=False
+        #     )
+
+        #     save_to_json(
+        #         {'labels': function_labels},
+        #         os.path.join(split_dir, 'function_labels.json')
+        #     )
+        #     save_to_json(
+        #         scores_function, os.path.join(split_dir, 'function_scores.json')
+        #     )
+        #     save_classifier(
+        #         function_clf, os.path.join(split_dir, 'function_classifier.pkl')
+        #     )
+        # except:
+        #     print('[Error] Function experiment failed somewhere.')
+
+        # ## Run Melody Non-Melody Experiment
+        # print("Running Melody experiment...")
+        # try:
+        #     melody_label_dict = utils.get_melody_label_dict(
+        #         train_component_labels, test_component_labels
+        #     )
+        #     melody_labels = ['non-melody', 'melody']
+        #     X_train, Y_train, X_test, Y_test = utils.build_training_testing_set(
+        #         train_contours, train_component_labels,
+        #         test_contours, test_component_labels,
+        #         melody_label_dict, delete_avg_pitch=rm_avg_pitch
+        #     )
+        #     scores_melody, melody_clf = fit_model(
+        #         X_train, Y_train, X_test, Y_test
+        #     )
+
+        #     save_to_json(
+        #         {'labels': melody_labels},
+        #         os.path.join(split_dir, 'melody_labels.json')
+        #     )
+        #     save_to_json(
+        #         scores_melody, os.path.join(split_dir, 'melody_scores.json')
+        #     )
+        #     save_classifier(
+        #         melody_clf, os.path.join(split_dir, 'melody_classifier.pkl')
+        #     )
+        # except:
+        #     print('[Error] Melody experiment failed somewhere.')
+
+        # ## Run Bass Non-Bass Experiment
+        # print("Running Bass experiment...")
+        # try:
+        #     bass_label_dict = utils.get_bass_label_dict(
+        #         train_component_labels, test_component_labels
+        #     )
+        #     bass_labels = ['non-bass', 'bass']
+        #     X_train, Y_train, X_test, Y_test = utils.build_training_testing_set(
+        #         train_contours, train_component_labels,
+        #         test_contours, test_component_labels,
+        #         bass_label_dict, delete_avg_pitch=rm_avg_pitch
+        #     )
+        #     scores_bass, bass_clf = fit_model(
+        #         X_train, Y_train, X_test, Y_test
+        #     )
+
+        #     save_to_json(
+        #         {'labels': bass_labels},
+        #         os.path.join(split_dir, 'bass_labels.json')
+        #     )
+        #     save_to_json(
+        #         scores_bass, os.path.join(split_dir, 'bass_scores.json')
+        #     )
+        #     save_classifier(
+        #         bass_clf, os.path.join(split_dir, 'bass_classifier.pkl')
+        #     )
+        # except:
+        #     print('[Error] Bass experiment failed somewhere.')
+
+        ## Run Vocal gender experiment
+        print("Running Vocal type experiment...")
         try:
-            vocal_label_dict = utils.get_vocal_label_dict(
-                train_instrument_labels, test_instrument_labels, VOCALS
+            voctype_label_dict, voctype_labels = utils.get_vocaltype_label_dict(
+                train_instrument_labels, test_instrument_labels,
+                ['male singer', 'female singer']
             )
-            vocal_labels = ['non-vocal', 'vocal']
+            print(voctype_label_dict)
             X_train, Y_train, X_test, Y_test = utils.build_training_testing_set(
                 train_contours, train_instrument_labels,
                 test_contours, test_instrument_labels,
-                vocal_label_dict
+                voctype_label_dict, delete_avg_pitch=rm_avg_pitch
             )
-            scores_vocal, vocal_clf = fit_model(
-                X_train, Y_train, X_test, Y_test
+            print(Y_test.shape)
+            print(set(Y_test))
+
+            scores_voctype, voctype_clf = fit_model(
+                X_train, Y_train, X_test, Y_test, compute_prob=True
             )
 
             save_to_json(
-                {'labels': vocal_labels},
-                os.path.join(split_dir, 'vocal_labels.json')
+                {'labels': voctype_labels},
+                os.path.join(split_dir, 'voctype_labels.json')
             )
             save_to_json(
-                scores_vocal, os.path.join(split_dir, 'vocal_scores.json')
+                scores_voctype, os.path.join(split_dir, 'voctype_scores.json')
             )
             save_classifier(
-                vocal_clf, os.path.join(split_dir, 'vocal_classifier.pkl')
+                voctype_clf, os.path.join(split_dir, 'voctype_classifier.pkl')
             )
         except:
-            print('[Error] Vocal experiment failed somewhere.')
+            print('[Error] Vocal type experiment failed somewhere.')
 
-        ## Run Melody Non-Melody Experiment
-        print("Running Melody experiment...")
-        try:
-            melody_label_dict = utils.get_melody_label_dict(
-                train_component_labels, test_component_labels
-            )
-            melody_labels = ['non-melody', 'melody']
-            X_train, Y_train, X_test, Y_test = utils.build_training_testing_set(
-                train_contours, train_component_labels,
-                test_contours, test_component_labels,
-                melody_label_dict
-            )
-            scores_melody, melody_clf = fit_model(
-                X_train, Y_train, X_test, Y_test
-            )
-
-            save_to_json(
-                {'labels': melody_labels},
-                os.path.join(split_dir, 'melody_labels.json')
-            )
-            save_to_json(
-                scores_melody, os.path.join(split_dir, 'melody_scores.json')
-            )
-            save_classifier(
-                melody_clf, os.path.join(split_dir, 'melody_classifier.pkl')
-            )
-        except:
-            print('[Error] Melody experiment failed somewhere.')
-
-        ## Run Bass Non-Bass Experiment
-        print("Running Bass experiment...")
-        try:
-            bass_label_dict = utils.get_bass_label_dict(
-                train_component_labels, test_component_labels
-            )
-            bass_labels = ['non-bass', 'bass']
-            X_train, Y_train, X_test, Y_test = utils.build_training_testing_set(
-                train_contours, train_component_labels,
-                test_contours, test_component_labels,
-                bass_label_dict
-            )
-            scores_bass, bass_clf = fit_model(
-                X_train, Y_train, X_test, Y_test
-            )
-
-            save_to_json(
-                {'labels': bass_labels},
-                os.path.join(split_dir, 'bass_labels.json')
-            )
-            save_to_json(
-                scores_bass, os.path.join(split_dir, 'bass_scores.json')
-            )
-            save_classifier(
-                bass_clf, os.path.join(split_dir, 'bass_classifier.pkl')
-            )
-        except:
-            print('[Error] Bass experiment failed somewhere.')
-
-        ## Run Instrument ID experiment
+        ## Run 10-class instrument ID experiment
         print("Running Instrument ID experiment...")
         try:
+            inst_list = [
+                'cello', 'double bass', 'electric bass', 'female singer',
+                'male rapper', 'male singer', 'tenor saxophone', 'trumpet',
+                'viola', 'violin'
+            ]
             inst_label_dict, inst_labels = utils.get_inst_label_dict(
-                train_instrument_labels, test_instrument_labels
+                train_instrument_labels, test_instrument_labels, inst_list
             )
             X_train, Y_train, X_test, Y_test = utils.build_training_testing_set(
                 train_contours, train_instrument_labels,
                 test_contours, test_instrument_labels,
-                inst_label_dict
+                inst_label_dict, delete_avg_pitch=rm_avg_pitch
             )
+
             scores_inst, inst_clf = fit_model(
                 X_train, Y_train, X_test, Y_test, compute_prob=False
             )
@@ -250,4 +290,13 @@ if __name__ == "__main__":
                         type=int,
                         default=5,
                         help="Number of iterations to run")
+    PARSER.add_argument("n_harms",
+                        type=int,
+                        default=8,
+                        help="number of harmonics for salience computation")
+    PARSER.add_argument("rm_avg_pitch",
+                        type=int,
+                        default=0,
+                        help="If True removes the feature equivalent to "
+                        "average pitch")
     main(PARSER.parse_args())

@@ -21,7 +21,7 @@ def main(args):
 
     (all_contours, all_instrument_labels,
      all_component_labels, all_trackid, all_stemid) = utils.get_contours(
-        all_trackids, save_contour_path
+        all_trackids, save_contour_path, args.n_harms
     )
 
     print("getting features...")
@@ -69,4 +69,6 @@ if __name__ == "__main__":
     PARSER.add_argument("save_contour_path",
                         type=str,
                         help="Path to save/find contours")
+    PARSER.add_argument("n_harms",
+                        type=int)
     main(PARSER.parse_args())
